@@ -1,20 +1,23 @@
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request
 from model import StressModel
 
 app = Flask(__name__)
 model = StressModel()
 
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html')
+
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.get_json()
-    features = [
-        data['sleep_hours'],
-        data['exercise_hours'],
-        data['screen_time'],
-        data['social_interaction']
-    ]
+    sleep_hours = float(request.form['sleep_hours'])
+    exercise_hours = float(request.form['exercise_hours'])
+    screen_time = float(request.form['screen_time'])
+    social_interaction = float(request.form['social_interaction'])
+    features = [sleep_hours, exercise_hours, screen_time, social_interaction]
     prediction = model.predict(features)
-    return jsonify({'stress_level': 'High' if prediction == 1 else 'Low'})
+    prediction_text = 'High' if prediction == 1 else 'Low'
+    return render_template('index.html', prediction=prediction_text)
 
 if __name__ == "__main__":
     app.run(debug=True)

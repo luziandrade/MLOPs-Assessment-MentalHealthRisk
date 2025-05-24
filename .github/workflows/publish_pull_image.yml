@@ -8,10 +8,8 @@ jobs:
   build-test-publish:
     runs-on: self-hosted
     steps:
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
     - name: Install dependencies
       run: |
@@ -28,7 +26,10 @@ jobs:
         password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
     - name: Build Docker image
-      run: docker build . -t ${{ secrets.DOCKERHUB_USERNAME }}/mental-health:latest
+      run: docker build . -t ${{ secrets.DOCKER_USERNAME }}/mental-health:latest
+
+    - name: Run tests inside Docker container
+      run: docker run --rm ${{ secrets.DOCKER_USERNAME }}/mental-health:latest pytest -s
 
     - name: Push Docker image  
       run: |

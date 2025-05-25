@@ -12,41 +12,29 @@ on:
           - dev
           - prod
 
-      release_version:
-        description: 'Source Image Tag (input the latest RB)'
-        required: true
-        type: string  
-
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Set environment variables
-      run: |
-        echo "APP_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
-        echo "RELEASE_VERSION=${{ github.event.inputs.release_version }}" >> $GITHUB_ENV
-        echo "IMAGE_TAG=${{ github.event.inputs.environment }}-${{ github.event.inputs.release_version }}" >> $GITHUB_ENV
+      run: echo "APP_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+
 
     - name: Deploy to server
       env:
         APP_ENV: ${{ github.event.inputs.environment }}
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        IMAGE_TAG: ${{ env.IMAGE_TAG }}
       run: |
-        ssh luanahubner18@34.32.105.54 <<EOF
-        docker pull ${DOCKER_USERNAME}/mental-health:${IMAGE_TAG}
-        docker stop flask_app_${APP_ENV} || true
-        docker rm flask_app_${APP_ENV} || true
-
-        if [ "${APP_ENV}" = "dev" ]; then
+        if [ "$APP_ENV" = "dev" ]; then
           PORT=5001
         else
           PORT=5000
         fi
-
-        docker run -d --name flask_app_${APP_ENV} -p ${PORT}:5000 ${DOCKER_USERNAME}/mental-health:${IMAGE_TAG}
-        EOF
+          docker pull ${DOCKER_USERNAME}/mental-health:${APP_ENV} &&
+          docker stop flask_app_${APP_ENV} || true &&
+          docker rm flask_app_${APP_ENV} || true &&
+          docker run -d --name flask_app_${APP_ENV} -p ${PORT}:5000 ${DOCKER_USERNAME}/mental-health:${APP_ENV} 

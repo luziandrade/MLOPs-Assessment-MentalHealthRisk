@@ -18,7 +18,7 @@ jobs:
         password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
     - name: Set image tag based on branch
-      id : vars
+      id: vars
       run: |
         BRANCH_NAME="${GITHUB_REF#refs/heads/}"
 
@@ -26,14 +26,6 @@ jobs:
           echo "TAG=prod" >> $GITHUB_ENV
         elif [[ "$BRANCH_NAME" == "dev" ]]; then
           echo "TAG=dev" >> $GITHUB_ENV
-        elif [[ "$BRANCH_NAME" == RB* ]]; then
-          git fetch origin main dev
-        
-          if git merge-base --is-ancestor origin/main HEAD; then
-            echo "TAG=prod-${BRANCH_NAME}" >> $GITHUB_ENV
-          else
-            echo "TAG=dev-${BRANCH_NAME}" >> $GITHUB_ENV
-          fi
         else
           echo "TAG=latest" >> $GITHUB_ENV
         fi

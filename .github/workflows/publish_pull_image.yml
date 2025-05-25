@@ -36,6 +36,7 @@ jobs:
           fi
         else
           echo "TAG=latest" >> $GITHUB_ENV
+        fi
 
     - name: Build Docker image
       run: docker build . -t ${{ secrets.DOCKER_USERNAME }}/mental-health:${{ env.TAG }}

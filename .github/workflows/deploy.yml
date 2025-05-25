@@ -37,16 +37,15 @@ jobs:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         IMAGE_TAG: ${{ env.IMAGE_TAG }}
       run: |
-        ssh luanahubner18@34.32.105.54 <<EOF
-        docker pull ${DOCKER_USERNAME}/mental-health:${IMAGE_TAG}
-        docker stop flask_app_${APP_ENV} || true
-        docker rm flask_app_${APP_ENV} || true
-
-        if [ "${APP_ENV}" = "dev" ]; then
+        IMAGE_TAG="${APP_ENV}-${RELEASE_VERSION}"
+        if [ "$APP_ENV" = "dev" ]; then
           PORT=5001
         else
           PORT=5000
         fi
 
-        docker run -d --name flask_app_${APP_ENV} -p ${PORT}:5000 ${DOCKER_USERNAME}/mental-health:${IMAGE_TAG}
-        EOF
+        ssh luanahubner18@34.32.105.54 "
+          docker pull ${DOCKER_USERNAME}/mental-health:${IMAGE_TAG} &&
+          docker stop flask_app_${APP_ENV} || true &&
+          docker rm flask_app_${APP_ENV} || true &&
+          docker run -d --name flask_app_${APP_ENV} -p ${PORT}:5000 ${DOCKER_USERNAME}/mental-health:${IMAGE_TAG} "

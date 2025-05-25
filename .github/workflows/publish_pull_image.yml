@@ -1,7 +1,7 @@
 name: Pull and Publish Docker Image
 
 on:
-  pull_request:
+  push:
     branches: [dev, main]
 
 jobs:
@@ -17,6 +17,17 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
+    - name: Set image tag based on branch
+      id: vars
+      run: |
+        if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+          echo "TAG=prod" >> $GITHUB_ENV
+        elif [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
+          echo "TAG=dev" >> $GITHUB_ENV
+        else
+          echo "TAG=latest" >> $GITHUB_ENV
+        fi
+
     - name: Build Docker image
       run: docker build . -t ${{ secrets.DOCKER_USERNAME }}/mental-health:latest
 
@@ -25,5 +36,6 @@ jobs:
 
     - name: Push Docker image  
       run: |
+        docker push ${{ secrets.DOCKER_USERNAME }}/mental-health:${{ env.TAG }}
         docker push ${{ secrets.DOCKER_USERNAME }}/mental-health:latest
 

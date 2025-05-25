@@ -14,7 +14,9 @@ def predict():
     exercise_hours = float(request.form['exercise_hours'])
     screen_time = float(request.form['screen_time'])
     social_interaction = float(request.form['social_interaction'])
-    features = [sleep_hours, exercise_hours, screen_time, social_interaction]
+    age = float(request.form['age'])
+    work_hours = float(request.form['work_hours'])
+    features = [sleep_hours, exercise_hours, screen_time, social_interaction, age ,work_hours]
     prediction = model.predict(features)
     prediction_text = 'High' if prediction == 1 else 'Low'
     return render_template('index.html', prediction=prediction_text)

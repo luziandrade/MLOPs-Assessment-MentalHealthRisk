@@ -30,3 +30,22 @@ jobs:
           name: trained-model
           path: model.pkl
 
+      - name: Check model accuracy
+        id: accuracy
+        run: |
+          ACCURACY=$(cat accuracy.txt)
+          echo "Model accuracy: $ACCURACY"
+          if (( $(echo "$ACCURACY >= 0.90" | bc -l) )); then
+            echo "pass=true" >> $GITHUB_OUTPUT
+          else
+            echo "pass=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Trigger redeploy workflow
+        if: steps.accuracy.outputs.pass == 'true'
+        run: |
+          gh workflow run redeploy.yml -f image_tag=prod
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+

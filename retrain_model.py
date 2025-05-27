@@ -38,3 +38,5 @@ print("Model retrained and saved as model.pkl.")
 y_pred = clf.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
 print(f"Retrained model accuracy: {accuracy:.2f}")
+with open("accuracy.txt", "w") as f:
+    f.write(str(accuracy))

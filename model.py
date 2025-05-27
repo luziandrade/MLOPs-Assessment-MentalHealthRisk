@@ -1,14 +1,14 @@
-# Import required libraries
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 
 class StressModel:
-    def __init__(self, data_path='health_dataset.csv'):
-        """Initialize model and trigger training on instantiation."""
-        self.data_path = data_path
-        self.model = None
-        self.train_model()
+    def __init__(self, model_path='model.pkl'):
+        if os.path.exists(model_path):
+            self.model = joblib.load(model_path)
+        else:
+            print("model.pkl not found, training new model...")
+            self.train_model()
 
     def load_data(self):
         """Load dataset and split into features/target."""

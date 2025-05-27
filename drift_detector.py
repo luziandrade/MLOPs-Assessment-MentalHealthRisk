@@ -45,3 +45,9 @@ if 'drift' in results.data.columns and results.data['drift'].any():
     print("Drift detected! Consider triggering retraining.")
 else:
     print("No significant drift detected.")
+
+with open('detect_drift_output.log', 'w') as log_file:
+    if 'drift' in results.data.columns and results.data['drift'].any():
+        log_file.write("Drift detected")
+    else:
+        log_file.write("No drift detected")

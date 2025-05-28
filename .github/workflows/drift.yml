@@ -5,12 +5,12 @@ on:
 
 jobs:
   drift:
-  runs-on: self-hosted
+    runs-on: self-hosted
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Simulate data drift
-      run: python simulate_drift.py
+      - name: Simulate data drift
+        run: python simulate_drift.py
 

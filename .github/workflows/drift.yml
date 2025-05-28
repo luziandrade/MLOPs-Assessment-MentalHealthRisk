@@ -3,8 +3,8 @@ name: Test Drift
 on:
   workflow_dispatch:
 
-  jobs:
-    drift:
+jobs:
+  drift:
     runs-on: self-hosted
 
     steps:

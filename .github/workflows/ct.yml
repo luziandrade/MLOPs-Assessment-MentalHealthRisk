@@ -1,0 +1,51 @@
+name: Continous Training
+
+on:
+  workflow_dispatch:
+
+jobs:
+  retrain-model:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install pandas scikit-learn joblib
+
+      - name: Run model training
+        run: |
+          python retrain_model.py
+
+      - name: Upload model artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: trained-model
+          path: model.pkl
+
+      - name: Check model accuracy
+        id: accuracy
+        run: |
+          ACCURACY=$(cat accuracy.txt)
+          echo "Model accuracy: $ACCURACY"
+          if (( $(echo "$ACCURACY >= 0.90" | bc -l) )); then
+            echo "pass=true" >> $GITHUB_OUTPUT
+          else
+            echo "pass=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Trigger redeploy workflow
+        if: steps.accuracy.outputs.pass == 'true'
+        run: |
+          gh workflow run redeploy.yml -f image_tag=dev
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+

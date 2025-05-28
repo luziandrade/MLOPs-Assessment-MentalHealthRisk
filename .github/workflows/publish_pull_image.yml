@@ -2,7 +2,7 @@ name: Pull and Publish Docker Image
 
 on:
   push:
-    branches: [dev, main]
+    branches: [dev, main, RB-*]
 
 jobs:
   build-test-publish:

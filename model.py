@@ -1,14 +1,16 @@
-# Import required libraries
+import os
+import joblib
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 
 class StressModel:
-    def __init__(self, data_path='health_dataset.csv'):
-        """Initialize model and trigger training on instantiation."""
-        self.data_path = data_path
-        self.model = None
-        self.train_model()
+    def __init__(self, model_path='model.pkl'):
+        if os.path.exists(model_path):
+            self.model = joblib.load(model_path)
+        else:
+            print("model.pkl not found, training new model...")
+            self.train_model()
 
     def load_data(self):
         """Load dataset and split into features/target."""
@@ -29,12 +31,6 @@ class StressModel:
 
     def predict(self, features):
         """Make prediction using trained model."""
-        feature_names = ['sleep_hours', 'exercise_hours', 'screen_time', 'social_interaction']
+        feature_names = ['sleep_hours', 'exercise_hours', 'screen_time', 'social_interaction', 'age', 'work_hours']
         X_new = pd.DataFrame([features], columns=feature_names)
         return int(self.model.predict(X_new)[0])
-
-if __name__ == "__main__":
-    model = StressModel()
-    sample_features = [6.5, 1.0, 8.0, 2.0]  
-    prediction = model.predict(sample_features)
-    print("Predicted Stress Level:", "High" if prediction == 1 else "Low")

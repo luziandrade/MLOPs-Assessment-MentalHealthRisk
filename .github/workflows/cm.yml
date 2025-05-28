@@ -1,0 +1,39 @@
+name: Continous Monitoring
+
+on:
+  schedule:
+    - cron: '0 3 * * *' 
+  workflow_dispatch:      
+
+jobs:
+  check-drift:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install pandas nannyml
+
+      - name: Run drift detection
+        run: |
+          python detect_drift.py
+
+      - name: Trigger retraining if drift detected
+        if: success() 
+        run: |
+          if grep -q "Drift detected" detect_drift_output.log; then
+            echo "Drift detected, triggering retraining..."
+            gh workflow run retrain_model.yml
+          else
+            echo "No drift detected. No action needed."
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

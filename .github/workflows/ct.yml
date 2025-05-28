@@ -44,7 +44,7 @@ jobs:
       - name: Trigger redeploy workflow
         if: steps.accuracy.outputs.pass == 'true'
         run: |
-          gh workflow run redeploy.yml -f image_tag=prod
+          gh workflow run redeploy.yml -f image_tag=dev
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -25,11 +25,11 @@ jobs:
 
 
         if [[ "$BRANCH_NAME" == "main" ]]; then
-          echo "TAG=prod" >> $GITHUB_ENV
+          ENV=prod
         elif [[ "$BRANCH_NAME" == "dev" ]]; then
-          echo "TAG=dev" >> $GITHUB_ENV
+          ENV=dev
         else
-          echo "TAG=latest" >> $GITHUB_ENV
+          ENV=latest
         fi
 
         VERSION_TAG="${ENV}${RUN_NUM}"

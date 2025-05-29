@@ -14,14 +14,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python3.8 -m pip install pandas scikit-learn joblib
+          python3.8 -m pip install --upgrade pip --user
+          python3.8 -m pip install pandas scikit-learn joblib --user
 
       - name: Run model training
         run: |
           python3.8 retrain_model.py
 
       - name: Upload model artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trained-model
           path: model.pkl

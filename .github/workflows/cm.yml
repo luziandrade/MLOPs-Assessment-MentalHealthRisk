@@ -13,14 +13,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+
       - name: Install dependencies
         run: |
-          python3.8 -m pip install --upgrade pip
-          python3.8 -m pip install pandas nannyml
+          pip install pandas nannyml
 
       - name: Run drift detection
         run: |
-          python3.8 detect_drift.py
+          python detect_drift.py
 
       - name: Trigger retraining if drift detected
         if: success() 

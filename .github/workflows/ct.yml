@@ -30,19 +30,22 @@ jobs:
       - name: Check model accuracy
         id: accuracy
         run: |
+          if [ ! -f accuracy.txt ]; then
+            echo "Error: accuracy.txt not found"
+            exit 1
+          fi
           ACCURACY=$(cat accuracy.txt)
           echo "Model accuracy: $ACCURACY"
-          if (( $(echo "$ACCURACY >= 0.90" | bc -l) )); then
-            echo "pass=true" >> $GITHUB_OUTPUT
-          else
-            echo "pass=false" >> $GITHUB_OUTPUT
-          fi
+          PASS=$(python3 -c "print('true' if float('$ACCURACY') >= 0.90 else 'false')")
+          echo "pass=$PASS" >> $GITHUB_OUTPUT
+
 
       - name: Trigger redeploy workflow
         if: steps.accuracy.outputs.pass == 'true'
-        run: |
-          gh workflow run redeploy.yml -f image_tag=dev
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: redeploy
+          client-payload: '{"image_tag": "dev"}'
 
 

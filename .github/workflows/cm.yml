@@ -15,11 +15,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pandas nannyml
+          python3.8 -m pip install --upgrade pip
+          python3.8 -m pip install pandas nannyml
 
       - name: Run drift detection
         run: |
-          python detect_drift.py
+          python3.8 detect_drift.py
 
       - name: Trigger retraining if drift detected
         if: success() 

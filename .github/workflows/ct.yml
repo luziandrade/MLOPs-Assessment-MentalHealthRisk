@@ -13,11 +13,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pandas scikit-learn joblib
+          python3.8 -m pip install pandas scikit-learn joblib
 
       - name: Run model training
         run: |
-          python retrain_model.py
+          python3.8 retrain_model.py
 
       - name: Upload model artifact
         uses: actions/upload-artifact@v3

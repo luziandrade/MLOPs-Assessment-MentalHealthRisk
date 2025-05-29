@@ -11,21 +11,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
 
       - name: Install dependencies
         run: |
-          pip install pandas scikit-learn joblib
+          python3.8 -m pip install --upgrade pip --user
+          python3.8 -m pip install pandas scikit-learn joblib --user
 
       - name: Run model training
         run: |
-          python retrain_model.py
+          python3.8 retrain_model.py
 
       - name: Upload model artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trained-model
           path: model.pkl
@@ -33,19 +30,26 @@ jobs:
       - name: Check model accuracy
         id: accuracy
         run: |
+          if [ ! -f accuracy.txt ]; then
+            echo "Error: accuracy.txt not found"
+            exit 1
+          fi
           ACCURACY=$(cat accuracy.txt)
           echo "Model accuracy: $ACCURACY"
-          if (( $(echo "$ACCURACY >= 0.90" | bc -l) )); then
-            echo "pass=true" >> $GITHUB_OUTPUT
-          else
-            echo "pass=false" >> $GITHUB_OUTPUT
+          PASS=$(python3 -c "print('true' if float('$ACCURACY') >= 0.90 else 'false')")
+          echo "pass=$PASS" >> $GITHUB_OUTPUT
+
+
+          # Fail job if accuracy below threshold to stop workflow
+          if [ "$PASS" != "true" ]; then
+            echo "Model accuracy below threshold, stopping workflow."
+            exit 1
           fi
 
       - name: Trigger redeploy workflow
         if: steps.accuracy.outputs.pass == 'true'
-        run: |
-          gh workflow run redeploy.yml -f image_tag=dev
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          event-type: redeploy
+          client-payload: '{"image_tag": "dev"}'

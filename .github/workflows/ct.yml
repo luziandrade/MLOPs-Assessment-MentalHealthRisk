@@ -40,12 +40,10 @@ jobs:
           echo "pass=$PASS" >> $GITHUB_OUTPUT
 
 
-      - name: Trigger redeploy workflow
-        if: steps.accuracy.outputs.pass == 'true'
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          event-type: redeploy
-          client-payload: '{"image_tag": "dev"}'
+          # Fail job if accuracy below threshold to stop workflow
+          if [ "$PASS" != "true" ]; then
+            echo "Model accuracy below threshold, stopping workflow."
+            exit 1
+          fi
 
 

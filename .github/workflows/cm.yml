@@ -17,7 +17,7 @@ jobs:
         run: |
           python3.8 -m pip install --upgrade pip --user
           python3.8 -m pip install pandas nannyml --user
-          python3.8 detect_drift.py
+          python3.8 drift_detector.py
 
 
       - name: Trigger retraining if drift detected

@@ -1,10 +1,8 @@
 name: Redeploy Docker Container
 
 on:
-  workflow_dispatch:
-    workflows: ["Continous Training"]
-    types:
-      - completed
+  repository_dispatch:
+    types: [redeploy]
 
 jobs:
   redeploy:
@@ -16,11 +14,16 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      
+      - name: Set variables from client payload
+        id: vars
+        run: |
+          echo "IMAGE_TAG=$(jq -r .image_tag <<< '${{ github.event.client_payload }}')" >> $GITHUB_ENV
 
       - name: Pull and restart Docker container
         run: |
-          TAG="${{ github.event.inputs.image_tag }}"
+          TAG="${{ env.IMAGE_TAG }}"
           docker pull ${{ secrets.DOCKER_USERNAME }}/mental-health:$TAG
           docker stop mental-health-container || true
           docker rm mental-health-container || true
-          docker run -d --name mental-health-container -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/mental-health:dev
+          docker run -d --name mental-health-container -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/mental-health:$TAG

@@ -21,6 +21,8 @@ jobs:
       id: vars
       run: |
         BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+        RUN_NUM=${GITHUB_RUN_NUMBER}
+
 
         if [[ "$BRANCH_NAME" == "main" ]]; then
           echo "TAG=prod" >> $GITHUB_ENV
@@ -30,13 +32,21 @@ jobs:
           echo "TAG=latest" >> $GITHUB_ENV
         fi
 
+        VERSION_TAG="${ENV}${RUN_NUM}"
+
+        echo "ENV=$ENV" >> $GITHUB_ENV
+        echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
+
     - name: Build Docker image
-      run: docker build . -t ${{ secrets.DOCKER_USERNAME }}/mental-health:${{ env.TAG }}
+      run: docker build . -t ${{ secrets.DOCKER_USERNAME }}/mental-health:${{ env.VERSION_TAG }} -t ${{ secrets.DOCKER_USERNAME }}/mental-health:${{ env.ENV }}
+
 
     - name: Run tests inside Docker container
-      run: docker run --rm ${{ secrets.DOCKER_USERNAME }}/mental-health:${{ env.TAG }} pytest -s
+      run: docker run --rm ${{ secrets.DOCKER_USERNAME }}/mental-health:${{ env.VERSION_TAG }} pytest -s
+
 
     - name: Push Docker image  
       run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/mental-health:${{ env.TAG }}
+        docker push ${{ secrets.DOCKER_USERNAME }}/mental-health:${{ env.VERSION_TAG }}
+
 

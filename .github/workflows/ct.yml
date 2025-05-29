@@ -46,4 +46,10 @@ jobs:
             exit 1
           fi
 
-
+      - name: Trigger redeploy workflow
+        if: steps.accuracy.outputs.pass == 'true'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          event-type: redeploy
+          client-payload: '{"image_tag": "dev"}'

@@ -1,4 +1,4 @@
-name: Continous Training
+name: Continuous Training
 
 on:
   workflow_dispatch:

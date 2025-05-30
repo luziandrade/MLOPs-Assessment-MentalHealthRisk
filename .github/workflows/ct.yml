@@ -2,8 +2,6 @@ name: Continuous Training
 
 on:
   workflow_dispatch:
-
-on:
   repository_dispatch:
     types: [training]
 

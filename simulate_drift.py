@@ -3,8 +3,8 @@ import numpy as np
 
 df = pd.read_csv('prediction_inputs_log.csv')
 
-df['screen_time'] = df['screen_time'] + 10   
-df['sleep_hours'] = df['sleep_hours'] - 3   
+df['screen_time'] = df['screen_time'] + 100   
+df['sleep_hours'] = df['sleep_hours'] - 5   
 
 print("Drift simulation applied:")
 print(df[['screen_time', 'age']].describe())    

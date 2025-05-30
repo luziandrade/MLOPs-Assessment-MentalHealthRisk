@@ -38,7 +38,7 @@ jobs:
         name: trained-model 
         run-id: ${{ github.event.inputs.model_artifact_run_id }}
         path: .
-        token: ${{ secrets.PAT_TOKEN }}
+        github-token:: ${{ secrets.PAT_TOKEN }}
 
 
 

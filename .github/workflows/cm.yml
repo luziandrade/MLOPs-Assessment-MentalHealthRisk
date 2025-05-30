@@ -21,13 +21,15 @@ jobs:
 
 
       - name: Trigger retraining if drift detected
-        if: success() 
+        if: success()
         run: |
           if grep -q "Drift detected" detect_drift_output.log; then
             echo "Drift detected, triggering retraining..."
-            gh workflow run "Continuous Training"
+            curl -X POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              https://api.github.com/repos/MLOPs-Assessment-MentalHealthRisk/actions/workflows/ct.yml/dispatches \
+              -d '{"ref":"dev"}'
           else
             echo "No drift detected. No action needed."
           fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

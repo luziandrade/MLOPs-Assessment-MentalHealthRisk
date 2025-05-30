@@ -25,7 +25,7 @@ jobs:
         run: |
           if grep -q "Drift detected" detect_drift_output.log; then
             echo "Drift detected, triggering retraining..."
-            gh workflow run retrain_model.yml
+            gh workflow run "Continuous Training"
           else
             echo "No drift detected. No action needed."
           fi

@@ -25,11 +25,18 @@ jobs:
         run: |
           if grep -q "Drift detected" detect_drift_output.log; then
             echo "Drift detected, triggering retraining..."
-            curl -X POST \
+
+            API_URL="https://api.github.com/repos/${{ github.repository }}/actions/workflows/ct.yml/dispatches"
+            
+            echo "Attempting to call API URL: $API_URL"
+
+            curl -v -X POST \
               -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \ 
-              https://api.github.com/repos/${{ github.repository }}/actions/workflows/ct.yml/dispatches \             
+              -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
+              "$API_URL" \  
               -d '{"ref":"dev"}'
           else
             echo "No drift detected. No action needed."
           fi
+            
+

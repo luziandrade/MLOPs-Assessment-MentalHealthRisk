@@ -3,6 +3,10 @@ name: Continuous Training
 on:
   workflow_dispatch:
 
+on:
+  repository_dispatch:
+    types: [training]
+
 jobs:
   retrain-model:
     runs-on: self-hosted
@@ -46,10 +50,14 @@ jobs:
             exit 1
           fi
 
-      - name: Trigger redeploy workflow
+      - name: Trigger build and deploy workflow
         if: steps.accuracy.outputs.pass == 'true'
-        uses: peter-evans/repository-dispatch@v3
+        uses: benc-uk/workflow-dispatch@v1
         with:
-          token: ${{ secrets.PAT_TOKEN }}
-          event-type: redeploy
-          client-payload: '{"image_tag": "dev"}'
+          workflow: Pull and Publish Docker Image 
+          token: ${{ secrets.PAT_TOKEN }} 
+          ref: dev 
+          inputs: '{
+            "model_artifact_run_id": "${{ github.run_id }}",
+            "target_branch": "dev"
+          }'

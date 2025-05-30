@@ -6,11 +6,9 @@ from sklearn.model_selection import train_test_split
 
 class StressModel:
     def __init__(self, model_path='model.pkl'):
-        if os.path.exists(model_path):
-            self.model = joblib.load(model_path)
-        else:
-            print("model.pkl not found, training new model...")
-            self.train_model()
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(f"Model file {model_path} not found. Please train the model first.")
+        self.model = joblib.load(model_path)
 
     def load_data(self):
         """Load dataset and split into features/target."""
@@ -19,15 +17,6 @@ class StressModel:
         y = df['stress_level']
         return train_test_split(X, y, test_size=0.2, random_state=42)
 
-    def train_model(self):
-        """Train logistic regression model and evaluate performance."""
-        X_train, X_test, y_train, y_test = self.load_data()
-        self.model = LogisticRegression(max_iter=200)
-        self.model.fit(X_train, y_train)
-
-        # Print accuracy metrics
-        print(f"Train Accuracy: {self.model.score(X_train, y_train):.2f}")
-        print(f"Test Accuracy: {self.model.score(X_test, y_test):.2f}")
 
     def predict(self, features):
         """Make prediction using trained model."""

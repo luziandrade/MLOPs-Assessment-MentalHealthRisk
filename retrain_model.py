@@ -13,11 +13,11 @@ if os.path.exists('prediction_inputs_log.csv'):
         df_all = pd.concat([df_train, df_new], ignore_index=True)
         print(f"Combined original and new data: {len(df_all)} rows.")
     else:
-        print("Warning: Columns in rediction_inputs_log.csv do not match health_dataset.csv. Using only original data.")
+        print("Warning: Columns in prediction_inputs_log.csv do not match health_dataset.csv. Using only original data.")
         df_all = df_train
 else:
     df_all = df_train
-    print("No rediction_inputs_log.csv found. Using only original data.")
+    print("No prediction_inputs_log.csv found. Using only original data.")
 
 df_all.to_csv('combined_training_data.csv', index=False)
 

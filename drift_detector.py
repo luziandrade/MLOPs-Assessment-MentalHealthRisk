@@ -25,7 +25,7 @@ feature_columns = ['sleep_hours', 'exercise_hours', 'screen_time', 'social_inter
 calc = UnivariateDriftCalculator(
     column_names=feature_columns,
     timestamp_column_name=None,
-    chunk_size=10
+    chunk_size=5
   
 )
 calc.fit(df_train[feature_columns])  

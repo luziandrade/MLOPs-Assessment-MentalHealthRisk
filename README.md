@@ -5,16 +5,6 @@ The goal of this project is to build an end-to-end **MLOps system** that support
 ---
 
 ## 📌 Branching Strategy
-graph TD
-    A(main)
-    A --> B(dev)
-    B --> C(RB-1)
-    C --> D(FB-A)
-    C --> E(FB-B)
-    C -->|PR| B
-    B -->|Deploy to Dev| A
-    A -->|Deploy to Prod| A
-(Deploy to Prod)
 
 - **FB**: Feature Branch  
 - **RB**: Release Branch  
@@ -36,11 +26,6 @@ graph TD
 ---
 
 ### 📈 Continuous Training - Continuous Monitoring (CT/CM)
-graph TD
-    A[Push to Feature Branch / PR to dev/main] --> B(CI: Build & Test)
-    B --> C{Branch}
-    C -- dev --> D[CD: Deploy to Dev]
-    C -- main --> E[Manual Promote to Prod]
 
     subgraph CT [Continuous Training]
         F[Trigger: Schedule / Manual / Alert]

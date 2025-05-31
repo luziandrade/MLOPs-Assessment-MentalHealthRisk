@@ -27,13 +27,17 @@ jobs:
 
     steps:
     - name: Clean Docker System on Runner
-      run: docker system prune -a -f
+      run:  docker system prune -af --volumes
       
     - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Start Minikube
       uses: medyagh/setup-minikube@latest
+      with:
+        driver: docker
+        memory: 4096
+        cpus: 2
 
     - name: Deploy to VM (${{ github.event.inputs.environment }})
       env:

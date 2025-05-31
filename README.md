@@ -5,20 +5,15 @@ The goal of this project is to build an end-to-end **MLOps system** that support
 ---
 
 ## 📌 Branching Strategy
-main
-│
-├── dev
-│ │
-│ ├── RB-1 ──┐
-│ │ │
-│ │ FB-A ──┐
-│ │ │
-│ │ FB-B ─┘
-│ │
-│ └── PR RB-1 → dev
-│ (Deploy to Dev)
-│
-└── Merge dev → main
+graph TD
+    A(main)
+    A --> B(dev)
+    B --> C(RB-1)
+    C --> D(FB-A)
+    C --> E(FB-B)
+    C -->|PR| B
+    B -->|Deploy to Dev| A
+    A -->|Deploy to Prod| A
 (Deploy to Prod)
 
 - **FB**: Feature Branch  
@@ -40,18 +35,21 @@ main
 
 ---
 
-### 📈 Continuous Training (CT)
-Trigger: Scheduled / Manual / Alert
-│
-▼
-Continuous Training Workflow
-├─ Checkout code & setup environment
-├─ Retrain model (retrain_model.py)
-├─ Save updated model.pkl
-└─ Upload model.pkl artifact
-│
-▼
-Trigger CI/CD Workflow with new model
-│
-▼
-Deploy to Dev (Manual promotion to Prod)
+### 📈 Continuous Training - Continuous Monitoring (CT/CM)
+graph TD
+    A[Push to Feature Branch / PR to dev/main] --> B(CI: Build & Test)
+    B --> C{Branch}
+    C -- dev --> D[CD: Deploy to Dev]
+    C -- main --> E[Manual Promote to Prod]
+
+    subgraph CT [Continuous Training]
+        F[Trigger: Schedule / Manual / Alert]
+        F --> G[Retrain Model (retrain_model.py)]
+        G --> H[Upload model.pkl Artifact]
+        H --> I[Trigger CI/CD Workflow]
+    end
+
+    subgraph CM [Continuous Monitoring]
+        J[Monitor Predictions / Metrics / Drift]
+        J --> |Degradation| F
+    end

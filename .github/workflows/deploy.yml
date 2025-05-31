@@ -1,53 +1,78 @@
-name: Promote Docker Image
+
+name: Promote Docker Image (VM & Minikube Demo)
 
 on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Select deployment environment'
+        description: 'Select VM deployment environment (dev or prod)'
         required: true
         default: 'dev'
         type: choice
         options:
           - dev
           - prod
-      version_tag:
-        description: 'Docker image version to deploy (e.g., dev23, prod19)'
-        required: false
-        default: ''
+      version_tag: 
+        description: 'Docker image version tag to deploy (e.g., dev42, prod21)'
+        required: true # 
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: self-hosted 
+    env:
+      APP_IMAGE_TO_DEPLOY: ${{ secrets.DOCKER_USERNAME }}/mental-health:${{ github.event.inputs.version_tag }}
+      K8S_DEPLOYMENT_FILE: k8s/deployment.yaml 
+      K8S_SERVICE_FILE: k8s/service.yaml       
+      K8S_APP_NAME: mental-health-app
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set environment variables
-      run: |
-        echo "APP_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
-        if [ -z "${{ github.event.inputs.version_tag }}" ]; then
-          echo "IMAGE_TAG=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
-        else
-          echo "IMAGE_TAG=${{ github.event.inputs.version_tag }}" >> $GITHUB_ENV
-        fi
+    - name: Start Minikube
+      uses: medyagh/setup-minikube@latest
 
-    - name: Deploy to server
+    - name: Deploy to VM (${{ github.event.inputs.environment }})
       env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        APP_ENV: ${{ env.APP_ENV }}
-        IMAGE_TAG: ${{ env.IMAGE_TAG }}
+        APP_ENV_FOR_VM: ${{ github.event.inputs.environment }}
       run: |
-        if [ "$APP_ENV" = "dev" ]; then
-          PORT=5001
-        else
-          PORT=5000
+        if [ "$APP_ENV_FOR_VM" = "dev" ]; then
+          PORT_VM=5001
+          CONTAINER_NAME_VM="flask_app_dev"
+        else # prod for VM
+          PORT_VM=5000
+          CONTAINER_NAME_VM="flask_app_prod"
         fi
 
-        echo "Deploying image: ${DOCKER_USERNAME}/mental-health:${IMAGE_TAG}"
+        echo "Deploying image to VM: ${{ env.APP_IMAGE_TO_DEPLOY }}"
 
-        docker pull ${DOCKER_USERNAME}/mental-health:${IMAGE_TAG} &&
-        docker stop flask_app_${APP_ENV} || true &&
-        docker rm flask_app_${APP_ENV} || true &&
-        docker run -d --name flask_app_${APP_ENV} -p ${PORT}:5000 ${DOCKER_USERNAME}/mental-health:${IMAGE_TAG}
+        docker pull ${{ env.APP_IMAGE_TO_DEPLOY }}
+        docker stop $CONTAINER_NAME_VM || true
+        docker rm $CONTAINER_NAME_VM || true
+        docker run -d --name $CONTAINER_NAME_VM -p ${PORT_VM}:5000 ${{ env.APP_IMAGE_TO_DEPLOY }}
+        echo "VM deployment for $APP_ENV_FOR_VM initiated for image ${{ env.APP_IMAGE_TO_DEPLOY }}"
+
+    - name: Load Image into Minikube
+      run: |
+        docker pull ${{ env.APP_IMAGE_TO_DEPLOY }}
+        minikube image load ${{ env.APP_IMAGE_TO_DEPLOY }}
+        echo "Verifying image in Minikube:"
+        minikube image ls
+
+    - name: Prepare K8s Deployment Manifest
+      run: |
+        echo "Updating image in ${{ env.K8S_DEPLOYMENT_FILE }} to ${{ env.APP_IMAGE_TO_DEPLOY }}"
+        sed -i 's|image: ${{ secrets.DOCKER_USERNAME }}/mental-health:.*|image: ${{ env.APP_IMAGE_TO_DEPLOY }} # Updated by workflow|g' ${{ env.K8S_DEPLOYMENT_FILE }}
+    
+        sed -i 's/imagePullPolicy: .*/imagePullPolicy: Never # Ensured by workflow/g' ${{ env.K8S_DEPLOYMENT_FILE }}
+    
+    - name: Deploy to Minikube
+      run: |
+        echo "Applying Kubernetes manifests to Minikube..."
+        kubectl apply -f ${{ env.K8S_DEPLOYMENT_FILE }}
+        kubectl apply -f ${{ env.K8S_SERVICE_FILE }} 
+
+
+
+
+

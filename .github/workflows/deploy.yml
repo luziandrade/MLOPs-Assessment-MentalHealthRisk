@@ -65,12 +65,10 @@ jobs:
         docker run -d --name $CONTAINER_NAME_VM -p ${PORT_VM}:5000 ${{ env.APP_IMAGE_TO_DEPLOY }}
         echo "VM deployment for $APP_ENV_FOR_VM initiated for image ${{ env.APP_IMAGE_TO_DEPLOY }}"
 
-    - name: Load Image into Minikube
+    - name: Build image directly in Minikube
       run: |
-        docker pull ${{ env.APP_IMAGE_TO_DEPLOY }}
-        minikube image load ${{ env.APP_IMAGE_TO_DEPLOY }}
-        echo "Verifying image in Minikube:"
-        minikube image ls
+        eval $(minikube -p minikube docker-env) # Point Docker CLI to Minikube's Docker
+        docker build -t ${{ env.APP_IMAGE_TO_DEPLOY }} . # Build the image
 
     - name: Prepare K8s Deployment Manifest
       run: |

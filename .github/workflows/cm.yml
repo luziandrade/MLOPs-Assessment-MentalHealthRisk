@@ -1,4 +1,3 @@
-name: Continous Monitoring
 
 on:
   schedule:
@@ -23,8 +22,10 @@ jobs:
       - name: Trigger retraining if drift detected
         if: success() 
         run: |
+          # This script only determines IF a trigger should happen
           if grep -q "Drift detected" detect_drift_output.log; then
-            echo "Drift detected."
+            echo "Drift detected, setting flag to trigger retraining..."
+            # Create a file or set an output that the next step can read
             echo "TRIGGER_CT=true" >> $GITHUB_ENV 
           else
             echo "No drift detected. No action needed."
@@ -37,6 +38,7 @@ jobs:
         with:
           workflow: ct.yml 
           token: ${{ secrets.PAT_TOKEN }}
-          ref: dev
+          ref: dev 
+
             
 

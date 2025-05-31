@@ -33,4 +33,4 @@ jobs:
           docker pull ${{ secrets.DOCKER_USERNAME }}/mental-health:$TAG
           docker stop mental-health-container || true
           docker rm mental-health-container || true
-          docker run -d --name mental-health-container -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/mental-health:$TAG
+          docker run -d --name mental-health-container -p 5001:5000 ${{ secrets.DOCKER_USERNAME }}/mental-health:$TAG

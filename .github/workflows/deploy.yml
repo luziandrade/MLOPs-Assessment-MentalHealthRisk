@@ -21,8 +21,8 @@ jobs:
     runs-on: self-hosted 
     env:
       APP_IMAGE_TO_DEPLOY: ${{ secrets.DOCKER_USERNAME }}/mental-health:${{ github.event.inputs.version_tag }}
-      K8S_DEPLOYMENT_FILE: k8s/deployment.yaml 
-      K8S_SERVICE_FILE: k8s/service.yaml       
+      K8S_DEPLOYMENT_FILE: k8s/deployment.yml 
+      K8S_SERVICE_FILE: k8s/service.yml       
       K8S_APP_NAME: mental-health-app
 
     steps:
@@ -62,9 +62,9 @@ jobs:
     - name: Prepare K8s Deployment Manifest
       run: |
         echo "Updating image in ${{ env.K8S_DEPLOYMENT_FILE }} to ${{ env.APP_IMAGE_TO_DEPLOY }}"
-        sed -i 's|image: ${{ secrets.DOCKER_USERNAME }}/mental-health:.*|image: ${{ env.APP_IMAGE_TO_DEPLOY }} # Updated by workflow|g' ${{ env.K8S_DEPLOYMENT_FILE }}
+        sed -i 's|image: ${{ secrets.DOCKER_USERNAME }}/mental-health:.*|image: ${{ env.APP_IMAGE_TO_DEPLOY }}
     
-        sed -i 's/imagePullPolicy: .*/imagePullPolicy: Never # Ensured by workflow/g' ${{ env.K8S_DEPLOYMENT_FILE }}
+        sed -i 's/imagePullPolicy: .*/imagePullPolicy: Never
     
     - name: Deploy to Minikube
       run: |

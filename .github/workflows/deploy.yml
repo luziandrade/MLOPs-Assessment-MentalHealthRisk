@@ -26,6 +26,9 @@ jobs:
       K8S_APP_NAME: mental-health-app
 
     steps:
+    - name: Clean Docker System on Runner
+      run: docker system prune -a -f
+      
     - name: Checkout code
       uses: actions/checkout@v4
 
@@ -62,9 +65,14 @@ jobs:
     - name: Prepare K8s Deployment Manifest
       run: |
         echo "Updating image in ${{ env.K8S_DEPLOYMENT_FILE }} to ${{ env.APP_IMAGE_TO_DEPLOY }}"
-        sed -i 's|image: ${{ secrets.DOCKER_USERNAME }}/mental-health:.*|image: ${{ env.APP_IMAGE_TO_DEPLOY }}
-    
-        sed -i 's/imagePullPolicy: .*/imagePullPolicy: Never
+        
+        sed -i 's|image: ${{ secrets.DOCKER_USERNAME }}/mental-health:.*|image: ${{ env.APP_IMAGE_TO_DEPLOY }} # Updated by workflow|g' ${{ env.K8S_DEPLOYMENT_FILE }}
+        
+        sed -i 's/imagePullPolicy: .*/imagePullPolicy: Never # Ensured by workflow/g' ${{ env.K8S_DEPLOYMENT_FILE }}
+        
+        echo "--- ${{ env.K8S_DEPLOYMENT_FILE }} content after update ---"
+        cat ${{ env.K8S_DEPLOYMENT_FILE }}
+        echo "----------------------------------------------------"
     
     - name: Deploy to Minikube
       run: |

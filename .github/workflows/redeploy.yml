@@ -17,7 +17,15 @@ jobs:
       - name: Set variables from client payload
         id: vars
         run: |
-          echo "IMAGE_TAG=$(jq -r .image_tag <<< '${{ github.event.client_payload }}')" >> $GITHUB_ENV
+          PARSED_IMAGE_TAG=$(echo '${{ toJson(github.event.client_payload) }}' | jq -r .image_tag)
+          
+          if [ -z "$PARSED_IMAGE_TAG" ]; then
+            echo "Error: Parsed IMAGE_TAG is empty. Check payload or jq parsing."
+            exit 1 
+          fi
+          
+          echo "IMAGE_TAG=$PARSED_IMAGE_TAG" >> $GITHUB_ENV
+          echo "Set IMAGE_TAG to '$PARSED_IMAGE_TAG' in GITHUB_ENV"
 
       - name: Pull and restart Docker container
         run: |

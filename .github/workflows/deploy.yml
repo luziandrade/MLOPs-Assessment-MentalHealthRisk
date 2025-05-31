@@ -32,6 +32,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Ensure no Minikube instance is running
+      run: |
+        minikube stop || echo "Minikube not running or failed to stop."
+        minikube delete --all --purge || echo "No Minikube cluster to delete or failed to delete."
+      continue-on-error: true
+
     - name: Start Minikube
       uses: medyagh/setup-minikube@latest
       with:

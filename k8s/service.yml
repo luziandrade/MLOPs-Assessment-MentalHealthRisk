@@ -1,12 +1,12 @@
-# k8s/prod-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
   name: mental-health-service
 spec:
-  type: LoadBalancer
+  type: LoadBalancer  
   ports:
     - protocol: TCP
       port: 80 
       targetPort: 5000 
-  type: NodePort 
+  selector:
+    app: mental-health-app

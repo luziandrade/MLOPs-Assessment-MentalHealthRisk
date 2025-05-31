@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mental-health-app
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: mental-health-app
+  template:
+    metadata:
+      labels:
+        app: mental-health-app 
+    spec:
+      containers:
+      - name: mental-health-container
+        image: luanafeitosa/mental-health:latest         
+        imagePullPolicy: IfNotPresent .
+        ports:
+        - containerPort: 5000
+
+

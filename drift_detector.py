@@ -9,9 +9,11 @@ REPORT_PATH = 'drift_report.html'
 required_columns = ['timestamp', 'sleep_hours', 'exercise_hours', 'screen_time',
                     'social_interaction', 'age', 'work_hours']
 
+# Ensuring the log data file exists. If not, create an empty CSV file with the required columns.
 if not os.path.exists(LOG_DATA_PATH):
     pd.DataFrame(columns=required_columns).to_csv(LOG_DATA_PATH, index=False)
 
+# This dataset acts as the reference against which drift is measured.
 df_train = pd.read_csv(TRAIN_DATA_PATH)
 df_log = pd.read_csv(LOG_DATA_PATH)
 
@@ -21,6 +23,7 @@ if 'timestamp' in df_log.columns:
 feature_columns = ['sleep_hours', 'exercise_hours', 'screen_time',
                    'social_interaction', 'age', 'work_hours']
 
+# Specifying which columns to analyze for dift and divides the data into chunk
 calc = UnivariateDriftCalculator(
     column_names=feature_columns,
     timestamp_column_name=None,
@@ -37,6 +40,7 @@ results_df.columns = ['_'.join(col).strip() if isinstance(col, tuple) else col
 print("Drift summary for each feature:")
 print(results_df)
 
+# Determining if any drift "alert" has been raised by NannyML for any feature in any chunk.
 drift_detected = any('alert' in col and results_df[col].any() for col in results_df.columns)
 
 if drift_detected:

@@ -5,8 +5,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import joblib
 
+# Loading the original training dataset that contains baseline data for training model.
 df_train = pd.read_csv('health_dataset.csv')
 
+# If this file exists, its data will be combined with the original training data.
 if os.path.exists('prediction_inputs_log.csv'):
     df_new = pd.read_csv('prediction_inputs_log.csv')
     if set(df_new.columns) == set(df_train.columns):
@@ -19,8 +21,10 @@ else:
     df_all = df_train
     print("No prediction_inputs_log.csv found. Using only original data.")
 
+# Saving the (potentially combined) data to a new CSV file named 'combined_training_data.csv'.
 df_all.to_csv('combined_training_data.csv', index=False)
 
+# These are the input variables that the model will use to make predictions.
 feature_columns = ['sleep_hours', 'exercise_hours', 'screen_time', 'social_interaction', 'age', 'work_hours']
 target_column = 'stress_level'
 
